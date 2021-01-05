@@ -157,6 +157,11 @@ function GLBItem ({ mouse, ...props }) {
 						const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 						// scene.background = envMap;
 						scene.environment = envMap;
+						mounter.traverse((item) => {
+							if (item.isMesh) {
+								item.matterial.envMap = envMap;
+							}
+						});
 					});
 		}
 	}, [hdr]);

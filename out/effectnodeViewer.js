@@ -269,24 +269,6 @@ class ENViewerProvider {
         const ACTOR = webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'summer.fbx'))).toString();
         const ACTORS = [
             {
-                name: 'matrix-fbx',
-                displayName: 'matrix-fbx',
-                type: 'fbx',
-                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'matrix.fbx'))).toString()
-            },
-            {
-                name: 'matrix-glb',
-                displayName: 'matrix-glb',
-                type: 'glb',
-                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'matrix.glb'))).toString()
-            },
-            {
-                name: 'swat-glb',
-                displayName: 'swat-glb',
-                type: 'glb',
-                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'swat.glb'))).toString()
-            },
-            {
                 name: 'eric-glb',
                 displayName: 'Eric-glb',
                 type: 'glb',
@@ -298,25 +280,45 @@ class ENViewerProvider {
                 type: 'fbx',
                 url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'eric.fbx'))).toString()
             },
+            {
+                name: 'swat-glb',
+                displayName: 'swat-glb',
+                type: 'glb',
+                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'swat.glb'))).toString()
+            },
+            {
+                name: 'matrix-fbx',
+                displayName: 'matrix-fbx',
+                type: 'fbx',
+                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'matrix.fbx'))).toString()
+            },
+            {
+                name: 'matrix-glb',
+                displayName: 'matrix-glb',
+                type: 'glb',
+                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'matrix.glb'))).toString()
+            },
         ];
         if (vscode.workspace && vscode.workspace.workspaceFolders) {
             const fs = require('fs');
             let newAdd = [];
             vscode.workspace.workspaceFolders.forEach(e => {
                 const actorsFolder = path.join(e.uri.path, './actors');
-                fs.readdirSync(actorsFolder).forEach((file) => {
-                    let newActor = {
-                        name: `${file}`,
-                        displayName: `${file}`,
-                        isFolder: true,
-                        isNew: true,
-                        type: `${path.extname(file).replace('.', '')}`,
-                        url: webview.asWebviewUri(vscode.Uri.file(path.join(actorsFolder, file))).toString()
-                    };
-                    newAdd.unshift(newActor);
-                    // let info = fs.statSync(path.join(actorsFolder, file))
-                    // console.log('workspace folder', JSON.stringify(info))
-                });
+                if (fs.existsSync(actorsFolder)) {
+                    fs.readdirSync(actorsFolder).forEach((file) => {
+                        let newActor = {
+                            name: `${file}`,
+                            displayName: `${file}`,
+                            isFolder: true,
+                            isNew: true,
+                            type: `${path.extname(file).replace('.', '')}`,
+                            url: webview.asWebviewUri(vscode.Uri.file(path.join(actorsFolder, file))).toString()
+                        };
+                        newAdd.unshift(newActor);
+                        // let info = fs.statSync(path.join(actorsFolder, file))
+                        // console.log('workspace folder', JSON.stringify(info))
+                    });
+                }
             });
             newAdd.sort((a, b) => {
                 if (a.name > b.name) {
@@ -331,16 +333,15 @@ class ENViewerProvider {
             });
             ACTORS.unshift(...newAdd);
         }
-        //
-        // console.log(scanFolder)
-        const fs = require('fs');
-        let scanFolder = path.join(document.uri.path, '../actors');
-        if (fs.existsSync(scanFolder)) {
-            // webview.asWebviewUri(document.uri).toString()
-            fs.readdirSync(scanFolder).forEach((file) => {
-                console.log('', file);
-            });
-        }
+        // // console.log(scanFolder)
+        // const fs = require('fs');
+        // let scanFolder = path.join(document.uri.path, '../actors');
+        // if (fs.existsSync(scanFolder)) {
+        // 	// webview.asWebviewUri(document.uri).toString()
+        // 	fs.readdirSync(scanFolder).forEach((file: any) => {
+        // 		console.log('', file);
+        // 	});
+        // }
         const isActionFolder = (SELECTED.indexOf('/action/') !== -1) || SELECTED.indexOf('/actions/') !== -1 || SELECTED.indexOf('/moves/') !== -1;
         const MODE = isActionFolder ? 'ACTION_PREVIEW' : 'MODEL_PREVIEW';
         return /* html */ `
