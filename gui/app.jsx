@@ -118,6 +118,7 @@ function GLBItem ({ mouse, ...props }) {
 			mounter = gltf.scene;
 			animations = gltf.animations;
 		}
+
 		if (fbx) {
 			mounter = fbx;
 			animations = fbx.animations;

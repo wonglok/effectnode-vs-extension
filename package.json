@@ -36,7 +36,7 @@
 	},
 	"scripts": {
 		"par": "parcel build ./gui/*.jsx --out-dir ./media/gui-out",
-		"dev": "nodemon --exec \"parcel build ./gui/*.jsx --out-dir ./media/gui-out\" ./gui/*",
+		"dev": "nodemon --exec \"parcel build ./gui/*.jsx --out-dir ./media/gui-out\" ./gui/* --no-source-maps",
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
 		"lint": "eslint . --ext .ts,.tsx",
