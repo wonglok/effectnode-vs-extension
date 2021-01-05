@@ -66,7 +66,7 @@ function Box (props) {
     <mesh
       {...props}
       ref={mesh}
-      scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
+      // scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
       onClick={(event) => {
 				setActive(!active);
 			}}
@@ -163,9 +163,9 @@ function GLBItem ({ mouse, ...props }) {
 
 	useEffect(() => {
 		if (!controls.current) {
-			camera.fov = 30;
+			camera.fov = 45;
 			camera.near = 0.01;
-			camera.far = 5000;
+			camera.far = 8000;
 			camera.updateProjectionMatrix();
 			controls.current = new OrbitControls( camera, gl.domElement );
 			controls.current.enableDamping = true;
@@ -184,20 +184,31 @@ function GLBItem ({ mouse, ...props }) {
 
 		// camera.position.z = 20 * 1;
 		// camera.position.y = 10 * 1;
-		mounter.position.set(0, 0, 0);
 		mounter.scale.set(0.2, 0.2, 0.2);
 		mounter.traverse((item) => {
-			if (item.name === 'mixamorigSpine') {
+			if (item.isMesh) {
+				item.frustumCulled = false;
+			}
+
+			if (item.name === 'mixamorigHead') {
 				item.getWorldPosition(controls.current.target);
-				controls.current.update();
 			}
 
 			if (item.name === 'mixamorigHead') {
 				item.getWorldPosition(camera.position);
-				camera.position.z += 30 * 4;
+				camera.position.z += 30 * 3;
 			}
 		});
 	});
+
+	// useFrame(() => {
+	// 	mounter.traverse((item) => {
+	// 		if (item.name === 'mixamorigNeck') {
+	// 			item.getWorldPosition(controls.current.target);
+	// 			controls.current.update();
+	// 		}
+	// 	});
+	// });
 
 	useFrame(() => {
 		if (controls.current) {
@@ -219,7 +230,7 @@ function GLBItem ({ mouse, ...props }) {
 
 	useFrame(() => {
 		mounter.traverse((item) => {
-			if (item.isBone && item.name === 'mixamorigHead') {
+			if (item.isBone && item.name === 'mixamorigHips') {
 				item.getWorldPosition(worldPos);
 				if (last.length() === 0.0) {
 					last.copy(worldPos);
@@ -229,12 +240,9 @@ function GLBItem ({ mouse, ...props }) {
 				}
 
 				if (diff.length() > 0) {
-					controls.current.object.position.add(diff);
+					camera.position.add(diff);
 				}
 			}
-			// if (item.isBone && item.name === 'mixamorigHips') {
-			// 	controls.current.target.lerp(worldPos, 0.2);
-			// }
 		});
 	});
 
@@ -245,7 +253,6 @@ function GLBItem ({ mouse, ...props }) {
 			}
 		});
 	},);
-
 
   useFrame((state, delta) => mixer.update(delta));
   useEffect(() => {
@@ -284,6 +291,8 @@ function MyScene ({ mouse }) {
 		<Suspense fallback={null}>
 			<GLBItem position-y={-5} mouse={mouse}></GLBItem>
 		</Suspense>
+		{/* <Box scale={[10, 10, 10]} position-x={10}></Box>
+		<Box scale={[10, 10, 10]} position-x={-10}></Box> */}
 		{/* {!(url) && <Box position={[0, 0, 0]} />} */}
 	</>;
 }
@@ -291,6 +300,7 @@ function MyScene ({ mouse }) {
 window.addEventListener('ready-gl', ({ detail }) => {
 	// let { gl } = detail;
 });
+
 // window.addEventListener('message', (e) => {
 // 	// if (e.data && e.data.type === 'loadGLB') {
 // 	// 	let url = e.data.url;
@@ -326,7 +336,7 @@ function ShadowMod({ ...props }) {
 			shadow-camera-bottom={d * -1}
 			shadow-camera-right={d}
 			shadow-camera-top={d}
-			shadow-camera-near={0.1}
+			shadow-camera-near={0.01}
 			shadow-camera-far={1500}
 		/>
     <group frustumCulled={false} rotation={[-0.5 * Math.PI, 0, 0]} position={[0, -5.15, 0]} {...props}>
