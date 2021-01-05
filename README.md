@@ -12,3 +12,4 @@
 1. install dependencies
 2. yarn run dev
 3. press F5 button (on mac it's Fn + F5).
+
