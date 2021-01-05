@@ -357,7 +357,7 @@ function Actors () {
 	// const setLookAtMouse = useActors(s => s.setLookAtMouse);
 	let btns = actors.map((a, i) => <div key={a.name + i} onClick={() => { chooseActor(a); }} style={{ color: '#222222', backgroundColor: '#ececec', display: 'inline-block', padding: '10px 20px' }}>{a.displayName}</div>);
 	return <div>
-		{btns}
+		{window.VIEWER.MODE === 'ACTION_PREVIEW' && btns}
 		<div onClick={() => { AppGlobals.lookAtMouse = !AppGlobals.lookAtMouse; }} style={{ color: '#222222', backgroundColor: '#ececec', display: 'inline-block', padding: '10px 20px' }}>Look At Mouse</div>
 	</div>;
 }
