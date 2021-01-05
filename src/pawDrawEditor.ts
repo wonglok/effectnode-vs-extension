@@ -418,42 +418,6 @@ export class PawDrawEditorProvider implements vscode.CustomEditorProvider<PawDra
 					path.join(this._context.extensionPath, 'media', 'chars', 'neo.fbx')
 				)).toString()
 			},
-			{
-				name: 'george',
-				displayName: 'george-glb',
-				type: 'glb',
-				url: webview.asWebviewUri(vscode.Uri.file(
-					path.join(this._context.extensionPath, 'media', 'chars', 'george.glb')
-				)).toString()
-			},
-			{
-				name: 'george',
-				displayName: 'george-fbx',
-				type: 'fbx',
-				url: webview.asWebviewUri(vscode.Uri.file(
-					path.join(this._context.extensionPath, 'media', 'chars', 'george.fbx')
-				)).toString()
-			},
-
-
-
-			// {
-			// 	name: 'swat-glb',
-			// 	displayName: 'Swat-glb',
-			// 	type: 'glb',
-			// 	url: webview.asWebviewUri(vscode.Uri.file(
-			// 		path.join(this._context.extensionPath, 'media', 'chars', 'swat.glb')
-			// 	)).toString()
-			// },
-			// {
-			// 	name: 'swat-fbx',
-			// 	displayName: 'Swat-fbx',
-			// 	type: 'fbx',
-			// 	url: webview.asWebviewUri(vscode.Uri.file(
-			// 		path.join(this._context.extensionPath, 'media', 'chars', 'swat.fbx')
-			// 	)).toString()
-			// },
-
 		]
 
 		const isActionFolder = (SELECTED.indexOf('/action/') !== -1) || SELECTED.indexOf('/actions/') !== -1 || SELECTED.indexOf('/moves/') !== -1
