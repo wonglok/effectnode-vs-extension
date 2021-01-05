@@ -125,13 +125,13 @@
 
 				const edit = this.endStroke();
 
-				if (edit.stroke.length) {
-					vscode.postMessage({
-						type: 'stroke',
-						color: edit.color,
-						stroke: edit.stroke,
-					});
-				}
+				// if (edit.stroke.length) {
+				// 	vscode.postMessage({
+				// 		type: 'stroke',
+				// 		color: edit.color,
+				// 		stroke: edit.stroke,
+				// 	});
+				// }
 			});
 
 			parent.addEventListener('mousemove', e => {

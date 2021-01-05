@@ -12,7 +12,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import create from 'zustand';
 
 // CustomEvent
-/* global document acquireVsCodeApi window Uint8Array console Blob CustomEvent URL setTimeout */
+/* global document acquireVsCodeApi window Uint8Array console Blob CustomEvent URL setTimeout setInterval clearInterval */
 const vscode = window.acquireVsCodeApi();
 let AppGlobals = {
 	gl: false,
@@ -20,26 +20,14 @@ let AppGlobals = {
 };
 
 const useActors = create((set, get) => {
-	let idx = 0;
-	let val = window.localStorage.getItem('actor_idx');
-	if (val) {
-		idx = Number(val);
-	}
 	return {
-		ACTOR: window.VIEWER.ACTORS[idx],
+		ACTOR: window.VIEWER.ACTORS[0],
 		ACTORS: window.VIEWER.ACTORS,
-		lookAtMouse: false,
-		setLookAtMouse: (v) => {
-			set({ lookAtMouse: v });
-		},
 		chooseActor: (v) => {
-			let index = window.VIEWER.ACTORS.findIndex(e => e.url === v.url);
-			window.localStorage.setItem('actor_idx', index);
 			set({ ACTOR: v });
 		}
 	};
 });
-
 
 function moveJoint (mouse, joint, degreeLimit = 40) {
   let degrees = getMouseDegrees(mouse.current.x, mouse.current.y, degreeLimit);
@@ -98,54 +86,63 @@ function GLBItem ({ mouse, ...props }) {
 
 	let action = false;
 
-	useMemo(() => {
-		if (window.VIEWER.MODE === 'ACTION_PREVIEW') {
-			if (ACTOR.indexOf('.fbx') !== -1) {
-				fbx = useLoader(FBXLoader, ACTOR);
-			} else if (ACTOR.indexOf('.glb') !== -1) {
-				gltf = useLoader(GLTFLoader, ACTOR);
-			}
-
-			if (window.VIEWER.SELECTED.indexOf('.fbx') !== -1) {
-				action = useLoader(FBXLoader, window.VIEWER.SELECTED);
-			} else if (window.VIEWER.SELECTED.indexOf('.glb') !== -1) {
-				action = useLoader(GLTFLoader, window.VIEWER.SELECTED);
-			}
-
-			if (gltf) {
-				mounter = gltf.scene;
-				animations = action.animations;
-			}
-			if (fbx) {
-				mounter = fbx;
-				animations = action.animations;
-			}
-		} else if (window.VIEWER.MODE === 'MODEL_PREVIEW') {
-			if (window.VIEWER.SELECTED.indexOf('.fbx') !== -1) {
-				fbx = useLoader(FBXLoader, window.VIEWER.SELECTED);
-			} else if (window.VIEWER.SELECTED.indexOf('.glb') !== -1) {
-				gltf = useLoader(GLTFLoader, window.VIEWER.SELECTED);
-			}
-
-			if (gltf) {
-				mounter = gltf.scene;
-				animations = gltf.animations;
-			}
-			if (fbx) {
-				mounter = fbx;
-				animations = fbx.animations;
-			}
+	if (window.VIEWER.MODE === 'ACTION_PREVIEW') {
+		if (ACTOR.indexOf('.fbx') !== -1) {
+			fbx = useLoader(FBXLoader, ACTOR);
+		} else if (ACTOR.indexOf('.glb') !== -1) {
+			gltf = useLoader(GLTFLoader, ACTOR);
 		}
-	}, [ACTOR]);
 
-	// useEffect(() => {
-	// 	mounter.traverse((item) => {
-	// 		console.log(item.name);
-	// 		// if (item.material) {
-	// 		// 	item.material.envMap = scene.environment;
-	// 		// }
-	// 	});
-	// });
+		if (window.VIEWER.SELECTED.indexOf('.fbx') !== -1) {
+			action = useLoader(FBXLoader, window.VIEWER.SELECTED);
+		} else if (window.VIEWER.SELECTED.indexOf('.glb') !== -1) {
+			action = useLoader(GLTFLoader, window.VIEWER.SELECTED);
+		}
+
+		if (gltf) {
+			mounter = gltf.scene;
+			animations = action.animations;
+		}
+		if (fbx) {
+			mounter = fbx;
+			animations = action.animations;
+		}
+	} else if (window.VIEWER.MODE === 'MODEL_PREVIEW') {
+		if (window.VIEWER.SELECTED.indexOf('.fbx') !== -1) {
+			fbx = useLoader(FBXLoader, window.VIEWER.SELECTED);
+		} else if (window.VIEWER.SELECTED.indexOf('.glb') !== -1) {
+			gltf = useLoader(GLTFLoader, window.VIEWER.SELECTED);
+		}
+
+		if (gltf) {
+			mounter = gltf.scene;
+			animations = gltf.animations;
+		}
+		if (fbx) {
+			mounter = fbx;
+			animations = fbx.animations;
+		}
+	}
+
+	useEffect(() => {
+		if (mounter) {
+			mounter.traverse((item) => {
+				if (item.isMesh) {
+					item.frustumCulled = false;
+					item.castShadow = true;
+				}
+			});
+		}
+	});
+
+	// // useEffect(() => {
+	// // 	mounter.traverse((item) => {
+	// // 		console.log(item.name);
+	// // 		// if (item.material) {
+	// // 		// 	item.material.envMap = scene.environment;
+	// // 		// }
+	// // 	});
+	// // });
 
 	useEffect(() => {
 		if (hdr) {
@@ -158,13 +155,23 @@ function GLBItem ({ mouse, ...props }) {
 						// scene.background = envMap;
 						scene.environment = envMap;
 						mounter.traverse((item) => {
-							if (item.isMesh) {
-								item.matterial.envMap = envMap;
+							if (item && item.isMesh) {
+								item.material.envMap = envMap;
 							}
 						});
 					});
 		}
 	}, [hdr]);
+
+	useFrame((state, delta) => mixer.update(delta));
+  useEffect(() => {
+    actions.current = { defaultAction: mixer.clipAction(animations[0], group.current) };
+		actions.current.defaultAction.play();
+
+    return () => {
+			mixer.uncacheRoot(group.current);
+		};
+  });
 
 	useMemo(() => {
 		let light = new PointLight('#ff00ff', 0.3);
@@ -183,72 +190,58 @@ function GLBItem ({ mouse, ...props }) {
 	}, [ACTOR]);
 
 	useEffect(() => {
-		if (!controls.current) {
-			camera.fov = 45;
-			camera.near = 0.01;
-			camera.far = 8000;
-			camera.updateProjectionMatrix();
-			controls.current = new OrbitControls( camera, gl.domElement );
-			controls.current.enableDamping = true;
-		}
+		camera.fov = 45;
+		camera.near = 0.01;
+		camera.far = 8000;
+		camera.updateProjectionMatrix();
+		controls.current = new OrbitControls( camera, gl.domElement );
+		controls.current.enableDamping = true;
 		controls.current.minDistance = 1;
 		controls.current.maxDistance = 10000000;
-		// controls.current.target.set( 0, 0, - 0.2 );
-
-		// controls.current.using = false
-		// controls.current.addEventListener('change', () => {
-		// 	controls.current.using = true
-		// 	setTimeout(() => {
-		// 		controls.current.using = false
-		// 	}, 1000)
-		// })
-
-		// camera.position.z = 20 * 1;
-		// camera.position.y = 10 * 1;
-		mounter.scale.set(0.2, 0.2, 0.2);
-		mounter.traverse((item) => {
-			if (item.isMesh) {
-				item.frustumCulled = false;
-			}
-
-			if (item.name === 'mixamorigHead') {
-				item.getWorldPosition(controls.current.target);
-			}
-
-			if (item.name === 'mixamorigNeck') {
-				item.getWorldPosition(camera.position);
-				camera.position.z += 30 * 2.6;
-			}
-		});
+		return () => {
+			controls.current.dispose();
+		};
 	});
 
-	// useFrame(() => {
-	// 	mounter.traverse((item) => {
-	// 		if (item.name === 'mixamorigHead') {
-	// 			item.getWorldPosition(controls.current.target);
-	// 		}
-	// 	});
-	// });
+	useEffect(() => {
+		if (mounter) {
+			mounter.scale.set(0.2, 0.2, 0.2);
+			mounter.traverse((item) => {
+				if (item.isMesh) {
+					item.frustumCulled = false;
+				}
 
-	useFrame(() => {
-		if (controls.current) {
-			controls.current.update();
+				if (item.name === 'mixamorigHead') {
+					let tt = setInterval(() => {
+						if (controls.current) {
+							clearInterval(tt);
+							item.getWorldPosition(controls.current.target);
+						}
+					}, 0);
+				}
+
+				if (item.name === 'mixamorigHead') {
+					item.getWorldPosition(camera.position);
+					camera.position.z += 30 * 2.6;
+				}
+			});
 		}
-	});
+		return () => {
+			//
+		};
+	}, [controls.current]);
 
-	const worldPos = useMemo(() => {
-		return new Vector3(0, 0, 0);
-	}, []);
-
-	const last = useMemo(() => {
-		return new Vector3(0, 0, 0);
-	}, []);
-
-	const diff = useMemo(() => {
-		return new Vector3(0, 0, 0);
-	}, []);
+	const { worldPos, last, diff } = useMemo(() => {
+		const worldPos = new Vector3(0, 0, 0);
+		const last = new Vector3(0, 0, 0);
+		const diff = new Vector3(0, 0, 0);
+		return { worldPos, last, diff };
+	}, [ACTOR]);
 
 	useFrame(() => {
+		if (!worldPos) {
+			return;
+		}
 		mounter.traverse((item) => {
 			if (item.isBone && item.name === 'mixamorigHips') {
 				item.getWorldPosition(worldPos);
@@ -258,7 +251,6 @@ function GLBItem ({ mouse, ...props }) {
 					diff.copy(worldPos).sub(last);
 					last.copy(worldPos);
 				}
-
 				if (diff.length() > 0) {
 					camera.position.add(diff);
 				}
@@ -266,33 +258,30 @@ function GLBItem ({ mouse, ...props }) {
 		});
 	});
 
-	useEffect(() => {
-		mounter.traverse((item) => {
-			if (item.isMesh) {
-				item.frustumCulled = false;
-				item.castShadow = true;
-			}
-		});
+	// // useFrame(() => {
+	// // 	mounter.traverse((item) => {
+	// // 		if (item.name === 'mixamorigHead') {
+	// // 			item.getWorldPosition(controls.current.target);
+	// // 		}
+	// // 	});
+	// // });
+
+	// // useEffect(() => {
+	// // 	mounter.traverse((item) => {
+	// // 		if (item.isMeshStandardMaterial) {
+	// // 			item.roughness = 0.5;
+	// // 			item.metalness = 0.3;
+	// // 		}
+	// // 	});
+	// // });
+
+
+	useFrame(() => {
+		if (controls.current) {
+			controls.current.update();
+		}
 	});
 
-	// useEffect(() => {
-	// 	mounter.traverse((item) => {
-	// 		if (item.isMeshStandardMaterial) {
-	// 			item.roughness = 0.5;
-	// 			item.metalness = 0.3;
-	// 		}
-	// 	});
-	// });
-
-  useFrame((state, delta) => mixer.update(delta));
-  useEffect(() => {
-    actions.current = { defaultAction: mixer.clipAction(animations[0], group.current) };
-		actions.current.defaultAction.play();
-
-    return () => {
-			mixer.uncacheRoot(group.current);
-		};
-  });
 
   useFrame((state, delta) => {
 		if (AppGlobals.lookAtMouse)  {
@@ -354,7 +343,7 @@ window.addEventListener('ready-gl', ({ detail }) => {
 // 	</mesh>;
 // }
 
-function ShadowMod({ ...props }) {
+function ShadowMod ({ ...props }) {
 	const d = 8.5 * 2 * 4;
 
   return (
