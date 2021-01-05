@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useLoader, useThree } from 'react-three-fiber';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { AnimationMixer, MathUtils, Vector3 } from 'three';
+import { AnimationMixer, MathUtils, PointLight, Vector3 } from 'three';
 import * as THREE from 'three';
 import { getMouseDegrees } from './utils';
 import { getFirstTouchPos, getMousePos } from "./utils";
@@ -49,34 +49,34 @@ function moveJoint (mouse, joint, degreeLimit = 40) {
   joint.rotation.y = THREE.Math.degToRad(joint.rotation.yD);
 }
 
-function Box (props) {
-  // This reference will give us direct access to the mesh
-  const mesh = useRef();
+// function Box (props) {
+//   // This reference will give us direct access to the mesh
+//   const mesh = useRef();
 
-  // Set up state for the hovered and active state
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
+//   // Set up state for the hovered and active state
+//   const [hovered, setHover] = useState(false);
+//   const [active, setActive] = useState(false);
 
-  // Rotate mesh every frame, this is outside of React without overhead
-  useFrame(() => {
-    mesh.current.rotation.x = mesh.current.rotation.y += 0.01;
-  });
+//   // Rotate mesh every frame, this is outside of React without overhead
+//   useFrame(() => {
+//     mesh.current.rotation.x = mesh.current.rotation.y += 0.01;
+//   });
 
-  return (
-    <mesh
-      {...props}
-      ref={mesh}
-      // scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
-      onClick={(event) => {
-				setActive(!active);
-			}}
-      onPointerOver={(event) => setHover(true)}
-      onPointerOut={(event) => setHover(false)}>
-      <boxBufferGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
-    </mesh>
-  );
-}
+//   return (
+//     <mesh
+//       {...props}
+//       ref={mesh}
+//       // scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
+//       onClick={(event) => {
+// 				setActive(!active);
+// 			}}
+//       onPointerOver={(event) => setHover(true)}
+//       onPointerOut={(event) => setHover(false)}>
+//       <boxBufferGeometry args={[1, 1, 1]} />
+//       <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
+//     </mesh>
+//   );
+// }
 
 function GLBItem ({ mouse, ...props }) {
 	let hdr = window.VIEWER.HDR;
@@ -138,14 +138,14 @@ function GLBItem ({ mouse, ...props }) {
 		}
 	}, [ACTOR]);
 
-	useEffect(() => {
-		mounter.traverse((item) => {
-			console.log(item.name);
-			// if (item.material) {
-			// 	item.material.envMap = scene.environment;
-			// }
-		});
-	});
+	// useEffect(() => {
+	// 	mounter.traverse((item) => {
+	// 		console.log(item.name);
+	// 		// if (item.material) {
+	// 		// 	item.material.envMap = scene.environment;
+	// 		// }
+	// 	});
+	// });
 
 	useEffect(() => {
 		if (hdr) {
@@ -160,6 +160,22 @@ function GLBItem ({ mouse, ...props }) {
 					});
 		}
 	}, [hdr]);
+
+	useMemo(() => {
+		let light = new PointLight('#ff00ff', 0.3);
+		light.position.x = 200;
+		light.position.z = 200;
+		light.position.y = 0;
+		mounter.getObjectByName('mixamorigHips').add(light);
+	}, [ACTOR]);
+
+	useMemo(() => {
+		let light = new PointLight('#00ffff', 0.3);
+		light.position.x = -200;
+		light.position.z = -200;
+		light.position.y = 0;
+		mounter.getObjectByName('mixamorigHips').add(light);
+	}, [ACTOR]);
 
 	useEffect(() => {
 		if (!controls.current) {
@@ -194,18 +210,17 @@ function GLBItem ({ mouse, ...props }) {
 				item.getWorldPosition(controls.current.target);
 			}
 
-			if (item.name === 'mixamorigHead') {
+			if (item.name === 'mixamorigNeck') {
 				item.getWorldPosition(camera.position);
-				camera.position.z += 30 * 3;
+				camera.position.z += 30 * 2.6;
 			}
 		});
 	});
 
 	// useFrame(() => {
 	// 	mounter.traverse((item) => {
-	// 		if (item.name === 'mixamorigNeck') {
+	// 		if (item.name === 'mixamorigHead') {
 	// 			item.getWorldPosition(controls.current.target);
-	// 			controls.current.update();
 	// 		}
 	// 	});
 	// });
@@ -218,15 +233,15 @@ function GLBItem ({ mouse, ...props }) {
 
 	const worldPos = useMemo(() => {
 		return new Vector3(0, 0, 0);
-	}, [ACTOR]);
+	}, []);
 
 	const last = useMemo(() => {
 		return new Vector3(0, 0, 0);
-	}, [ACTOR]);
+	}, []);
 
 	const diff = useMemo(() => {
 		return new Vector3(0, 0, 0);
-	}, [ACTOR]);
+	}, []);
 
 	useFrame(() => {
 		mounter.traverse((item) => {
@@ -249,10 +264,20 @@ function GLBItem ({ mouse, ...props }) {
 	useEffect(() => {
 		mounter.traverse((item) => {
 			if (item.isMesh) {
+				item.frustumCulled = false;
 				item.castShadow = true;
 			}
 		});
-	},);
+	});
+
+	// useEffect(() => {
+	// 	mounter.traverse((item) => {
+	// 		if (item.isMeshStandardMaterial) {
+	// 			item.roughness = 0.5;
+	// 			item.metalness = 0.3;
+	// 		}
+	// 	});
+	// });
 
   useFrame((state, delta) => mixer.update(delta));
   useEffect(() => {
@@ -270,6 +295,7 @@ function GLBItem ({ mouse, ...props }) {
 			if (mixamorigNeck) {
 				moveJoint(mouse, mixamorigNeck, 34);
 			}
+
 			let mixamorigSpine = mounter.getObjectByName('mixamorigSpine');
 			if (mixamorigSpine) {
 				moveJoint(mouse, mixamorigSpine, 40);
@@ -285,12 +311,13 @@ function GLBItem ({ mouse, ...props }) {
 
 function MyScene ({ mouse }) {
 	return <>
-		<ambientLight intensity={0.3} />
+		<ambientLight intensity={0.5} />
 		<ShadowMod  />
-		<pointLight intensity={1} position={[10, 10, 10]} />
+		<pointLight intensity={0.6} position={[10, 10, 10]} />
 		<Suspense fallback={null}>
 			<GLBItem position-y={-5} mouse={mouse}></GLBItem>
 		</Suspense>
+
 		{/* <Box scale={[10, 10, 10]} position-x={10}></Box>
 		<Box scale={[10, 10, 10]} position-x={-10}></Box> */}
 		{/* {!(url) && <Box position={[0, 0, 0]} />} */}
@@ -330,7 +357,7 @@ function ShadowMod({ ...props }) {
 		<directionalLight
 			castShadow
 			intensity={0.2}
-			position={[-10, 20, 18]}
+			position={[-70, 100, 70]}
 
 			shadow-camera-left={d * -1}
 			shadow-camera-bottom={d * -1}
@@ -339,7 +366,7 @@ function ShadowMod({ ...props }) {
 			shadow-camera-near={0.01}
 			shadow-camera-far={1500}
 		/>
-    <group frustumCulled={false} rotation={[-0.5 * Math.PI, 0, 0]} position={[0, -5.15, 0]} {...props}>
+    <group frustumCulled={false} rotation={[-0.5 * Math.PI, 0, 0]} position={[0, -5.0, 0]} {...props}>
       <mesh frustumCulled={false} receiveShadow renderOrder={2}>
         <planeBufferGeometry args={[500, 500, 1, 1]} />
         <shadowMaterial shadowSide={THREE.DoubleSide} side={THREE.DoubleSide} transparent opacity={0.5} />
@@ -354,11 +381,6 @@ function ShadowMod({ ...props }) {
   );
 }
 
-function JSXGen () {
-	let selectedFile = window.VIEWER.SELECTED
-
-}
-
 window.addEventListener('keydown', (event) => {
 	if (event.metaKey && (event.key === 'r')) {
 		vscode.postMessage({ type: 'reload' });
@@ -370,24 +392,26 @@ function Actors () {
 	const chooseActor = useActors(s => s.chooseActor);
 	// const lookAtMouse = useActors(s => s.lookAtMouse);
 	// const setLookAtMouse = useActors(s => s.setLookAtMouse);
-	let btns = actors.map((a, i) => <div key={a.name + i} onClick={() => { chooseActor(a); }} style={{ color: '#222222', backgroundColor: '#ececec', display: 'inline-block', padding: '10px 20px' }}>{a.displayName}</div>);
+	let btns = actors.map((a, i) => <div key={a.name + i} onClick={() => { chooseActor(a); }} style={{ color: (a.isNew ? '#ffffff' : '#222222'), backgroundColor: (a.isNew ? '#238823' : '#ececec'), display: 'inline-block', padding: '10px 20px' }}>{a.displayName}</div>);
 	return <div>
-		{window.VIEWER.MODE === 'ACTION_PREVIEW' && btns}
 		<div onClick={() => { AppGlobals.lookAtMouse = !AppGlobals.lookAtMouse; }} style={{ color: '#222222', backgroundColor: '#ececec', display: 'inline-block', padding: '10px 20px' }}>Look At Mouse</div>
+		{window.VIEWER.MODE === 'ACTION_PREVIEW' && btns}
 	</div>;
 }
 
 function App () {
 	const mouse = useRef({ x: 0, y: 0 });
   useEffect(() => {
-    mouse.current.x = window.innerWidth / 2;
-    mouse.current.y = window.innerHeight / 2;
+		if (mouse.current) {
+			mouse.current.x = window.innerWidth / 2;
+			mouse.current.y = window.innerHeight / 2;
+		}
 	});
 	return <div style={{ height: `calc(100%)` }}>
-		<div style={{ display: 'block', height: '40px' }} >
+		<div style={{ display: 'block', position: 'absolute', top: '0px', left: '0px', zIndex: 10, height: '120px', overflow: 'auto' }} >
 			<Actors></Actors>
 		</div>
-		<div style={{ height: `calc(100% - 40px)` }}>
+		<div style={{ height: `calc(100%)` }}>
 		<Canvas
 			shadowMap
 			pixelRatio={[1.25, 2.5]}
