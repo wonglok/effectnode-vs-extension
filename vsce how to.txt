@@ -1,0 +1,7 @@
+
+# pack a extension
+vsce package
+
+# upload page
+
+https://marketplace.visualstudio.com/manage/publishers/effectnode
