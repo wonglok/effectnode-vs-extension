@@ -419,19 +419,19 @@ export class PawDrawEditorProvider implements vscode.CustomEditorProvider<PawDra
 				)).toString()
 			},
 			{
-				name: 'eric-glass',
-				displayName: 'Eric-Glass-glb',
+				name: 'george',
+				displayName: 'george-glb',
 				type: 'glb',
 				url: webview.asWebviewUri(vscode.Uri.file(
-					path.join(this._context.extensionPath, 'media', 'chars', 'eric-summer.glb')
+					path.join(this._context.extensionPath, 'media', 'chars', 'george.glb')
 				)).toString()
 			},
 			{
-				name: 'eric-glass',
-				displayName: 'Eric-Glass-fbx',
+				name: 'george',
+				displayName: 'george-fbx',
 				type: 'fbx',
 				url: webview.asWebviewUri(vscode.Uri.file(
-					path.join(this._context.extensionPath, 'media', 'chars', 'eric-summer.fbx')
+					path.join(this._context.extensionPath, 'media', 'chars', 'george.fbx')
 				)).toString()
 			},
 

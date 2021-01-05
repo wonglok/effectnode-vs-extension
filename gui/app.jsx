@@ -15,7 +15,8 @@ import create from 'zustand';
 /* global document acquireVsCodeApi window Uint8Array console Blob CustomEvent URL setTimeout */
 const vscode = window.acquireVsCodeApi();
 let AppGlobals = {
-	gl: false
+	gl: false,
+	lookAtMouse: false
 };
 
 const useActors = create((set, get) => {
@@ -27,6 +28,10 @@ const useActors = create((set, get) => {
 	return {
 		ACTOR: window.VIEWER.ACTORS[idx],
 		ACTORS: window.VIEWER.ACTORS,
+		lookAtMouse: false,
+		setLookAtMouse: (v) => {
+			set({ lookAtMouse: v });
+		},
 		chooseActor: (v) => {
 			let index = window.VIEWER.ACTORS.findIndex(e => e.url === v.url);
 			window.localStorage.setItem('actor_idx', index);
@@ -75,10 +80,8 @@ function Box (props) {
 
 function GLBItem ({ mouse, ...props }) {
 	let hdr = window.VIEWER.HDR;
-	let url = window.VIEWER.SELECTED;
 	let ACTOROBJ = useActors(s => s.ACTOR);
 	let ACTOR = ACTOROBJ.url;
-	console.log(JSON.stringify(ACTOROBJ));
 
 	const mixer = useMemo(() => new AnimationMixer(), [ACTOR]);
 
@@ -95,43 +98,45 @@ function GLBItem ({ mouse, ...props }) {
 
 	let action = false;
 
-	if (window.VIEWER.MODE === 'ACTION_PREVIEW') {
-		if (ACTOR.indexOf('.fbx') !== -1) {
-			fbx = useLoader(FBXLoader, ACTOR);
-		} else if (ACTOR.indexOf('.glb') !== -1) {
-			gltf = useLoader(GLTFLoader, ACTOR);
-		}
+	useMemo(() => {
+		if (window.VIEWER.MODE === 'ACTION_PREVIEW') {
+			if (ACTOR.indexOf('.fbx') !== -1) {
+				fbx = useLoader(FBXLoader, ACTOR);
+			} else if (ACTOR.indexOf('.glb') !== -1) {
+				gltf = useLoader(GLTFLoader, ACTOR);
+			}
 
-		if (window.VIEWER.SELECTED.indexOf('.fbx') !== -1) {
-			action = useLoader(FBXLoader, window.VIEWER.SELECTED);
-		} else if (window.VIEWER.SELECTED.indexOf('.glb') !== -1) {
-			action = useLoader(GLTFLoader, window.VIEWER.SELECTED);
-		}
+			if (window.VIEWER.SELECTED.indexOf('.fbx') !== -1) {
+				action = useLoader(FBXLoader, window.VIEWER.SELECTED);
+			} else if (window.VIEWER.SELECTED.indexOf('.glb') !== -1) {
+				action = useLoader(GLTFLoader, window.VIEWER.SELECTED);
+			}
 
-		if (gltf) {
-			mounter = gltf.scene;
-			animations = action.animations;
-		}
-		if (fbx) {
-			mounter = fbx;
-			animations = action.animations;
-		}
-	} else if (window.VIEWER.MODE === 'MODEL_PREVIEW') {
-		if (window.VIEWER.SELECTED.indexOf('.fbx') !== -1) {
-			fbx = useLoader(FBXLoader, window.VIEWER.SELECTED);
-		} else if (window.VIEWER.SELECTED.indexOf('.glb') !== -1) {
-			gltf = useLoader(GLTFLoader, window.VIEWER.SELECTED);
-		}
+			if (gltf) {
+				mounter = gltf.scene;
+				animations = action.animations;
+			}
+			if (fbx) {
+				mounter = fbx;
+				animations = action.animations;
+			}
+		} else if (window.VIEWER.MODE === 'MODEL_PREVIEW') {
+			if (window.VIEWER.SELECTED.indexOf('.fbx') !== -1) {
+				fbx = useLoader(FBXLoader, window.VIEWER.SELECTED);
+			} else if (window.VIEWER.SELECTED.indexOf('.glb') !== -1) {
+				gltf = useLoader(GLTFLoader, window.VIEWER.SELECTED);
+			}
 
-		if (gltf) {
-			mounter = gltf.scene;
-			animations = gltf.animations;
+			if (gltf) {
+				mounter = gltf.scene;
+				animations = gltf.animations;
+			}
+			if (fbx) {
+				mounter = fbx;
+				animations = fbx.animations;
+			}
 		}
-		if (fbx) {
-			mounter = fbx;
-			animations = fbx.animations;
-		}
-	}
+	}, [ACTOR]);
 
 	useEffect(() => {
 		mounter.traverse((item) => {
@@ -202,15 +207,15 @@ function GLBItem ({ mouse, ...props }) {
 
 	const worldPos = useMemo(() => {
 		return new Vector3(0, 0, 0);
-	}, []);
+	}, [ACTOR]);
 
 	const last = useMemo(() => {
 		return new Vector3(0, 0, 0);
-	}, []);
+	}, [ACTOR]);
 
 	const diff = useMemo(() => {
 		return new Vector3(0, 0, 0);
-	}, []);
+	}, [ACTOR]);
 
 	useFrame(() => {
 		mounter.traverse((item) => {
@@ -238,15 +243,8 @@ function GLBItem ({ mouse, ...props }) {
 			if (item.isMesh) {
 				item.castShadow = true;
 			}
-
-			// if (item.name === 'mixamorigHead') {
-			// 	// camera.lookAt(item.position);
-			// 	// item.getWorldPosition(camera.position);
-			// 	// camera.position.z += 30;
-			// 	// camera.position.y += 5;
-			// }
 		});
-	});
+	},);
 
 
   useFrame((state, delta) => mixer.update(delta));
@@ -259,12 +257,18 @@ function GLBItem ({ mouse, ...props }) {
 		};
   });
 
-  // useFrame((state, delta) => {
-	// 	if (nodes.mixamorigNeck) {
-	// 		moveJoint(mouse, nodes.mixamorigNeck, 34);
-	// 		moveJoint(mouse, nodes.mixamorigSpine);
-	// 	}
-	// });
+  useFrame((state, delta) => {
+		if (AppGlobals.lookAtMouse)  {
+			let mixamorigNeck = mounter.getObjectByName('mixamorigNeck');
+			if (mixamorigNeck) {
+				moveJoint(mouse, mixamorigNeck, 34);
+			}
+			let mixamorigSpine = mounter.getObjectByName('mixamorigSpine');
+			if (mixamorigSpine) {
+				moveJoint(mouse, mixamorigSpine, 40);
+			}
+		}
+	});
 
 	return <group ref={group} {...props} dispose={null}>
 		{/* {action && <primitive object={action.getObjectByName('mixamorigHips')} />} */}
@@ -349,9 +353,12 @@ window.addEventListener('keydown', (event) => {
 function Actors () {
 	const actors = useActors(s => s.ACTORS);
 	const chooseActor = useActors(s => s.chooseActor);
+	// const lookAtMouse = useActors(s => s.lookAtMouse);
+	// const setLookAtMouse = useActors(s => s.setLookAtMouse);
 	let btns = actors.map((a, i) => <div key={a.name + i} onClick={() => { chooseActor(a); }} style={{ color: '#222222', backgroundColor: '#ececec', display: 'inline-block', padding: '10px 20px' }}>{a.displayName}</div>);
 	return <div>
 		{btns}
+		<div onClick={() => { AppGlobals.lookAtMouse = !AppGlobals.lookAtMouse; }} style={{ color: '#222222', backgroundColor: '#ececec', display: 'inline-block', padding: '10px 20px' }}>Look At Mouse</div>
 	</div>;
 }
 

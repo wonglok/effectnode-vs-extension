@@ -297,16 +297,16 @@ class PawDrawEditorProvider {
                 url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'neo.fbx'))).toString()
             },
             {
-                name: 'eric-glass',
-                displayName: 'Eric-Glass-glb',
+                name: 'george',
+                displayName: 'george-glb',
                 type: 'glb',
-                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'eric-summer.glb'))).toString()
+                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'george.glb'))).toString()
             },
             {
-                name: 'eric-glass',
-                displayName: 'Eric-Glass-fbx',
+                name: 'george',
+                displayName: 'george-fbx',
                 type: 'fbx',
-                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'eric-summer.fbx'))).toString()
+                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'george.fbx'))).toString()
             },
         ];
         const isActionFolder = (SELECTED.indexOf('/action/') !== -1) || SELECTED.indexOf('/actions/') !== -1 || SELECTED.indexOf('/moves/') !== -1;
