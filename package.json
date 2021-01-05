@@ -2,7 +2,7 @@
 	"name": "effectnode-viewer",
 	"displayName": "EffectNode Action Viewer",
 	"description": "Character and Action Viewer",
-	"version": "0.0.3",
+	"version": "0.0.5",
 	"publisher": "effectnode",
 	"engines": {
 		"vscode": "^1.46.0"
@@ -51,6 +51,7 @@
 		"eslint": "^7.1.0",
 		"typescript": "^4.0.2"
 	},
+	"icon": "effectnode.png",
 	"dependencies": {
 		"lodash": "^4.17.19",
 		"react": "^17.0.1",

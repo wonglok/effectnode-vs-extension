@@ -354,6 +354,11 @@ function ShadowMod({ ...props }) {
   );
 }
 
+function JSXGen () {
+	let selectedFile = window.VIEWER.SELECTED
+
+}
+
 window.addEventListener('keydown', (event) => {
 	if (event.metaKey && (event.key === 'r')) {
 		vscode.postMessage({ type: 'reload' });
