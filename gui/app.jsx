@@ -211,7 +211,7 @@ function GLBItem ({ mouse, ...props }) {
 					item.frustumCulled = false;
 				}
 
-				if (item.name === 'mixamorigHead') {
+				if (item.name === 'mixamorigNeck') {
 					let tt = setInterval(() => {
 						if (controls.current) {
 							clearInterval(tt);
@@ -220,7 +220,7 @@ function GLBItem ({ mouse, ...props }) {
 					}, 0);
 				}
 
-				if (item.name === 'mixamorigHead') {
+				if (item.name === 'mixamorigNeck') {
 					item.getWorldPosition(camera.position);
 					camera.position.z += 30 * 2.6;
 				}
@@ -362,12 +362,12 @@ function ShadowMod ({ ...props }) {
 		/>
     <group frustumCulled={false} rotation={[-0.5 * Math.PI, 0, 0]} position={[0, -5.0, 0]} {...props}>
       <mesh frustumCulled={false} receiveShadow renderOrder={2}>
-        <planeBufferGeometry args={[500, 500, 1, 1]} />
+        <circleBufferGeometry args={[500, 128]} />
         <shadowMaterial shadowSide={THREE.DoubleSide} side={THREE.DoubleSide} transparent opacity={0.5} />
       </mesh>
 
       <mesh frustumCulled={false}  receiveShadow renderOrder={1}>
-        <planeBufferGeometry args={[500, 500, 1, 1]} />
+        <circleBufferGeometry args={[500, 128]} />
         <meshBasicMaterial shadowSide={THREE.DoubleSide} side={THREE.DoubleSide} color="#bababa" transparent opacity={0.5} />
       </mesh>
     </group>
