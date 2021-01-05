@@ -6,3 +6,9 @@
 # Credit
 - Mixamo to download Character and Action Files
 - Fuse at Steam to genreate Character
+
+# Develop
+
+1. install dependencies
+2. yarn run dev
+3. press F5 button (on mac it's Fn + F5).

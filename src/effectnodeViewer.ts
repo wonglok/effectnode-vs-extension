@@ -191,27 +191,27 @@ class PawDrawDocument extends Disposable implements vscode.CustomDocument {
  * - Implementing save, undo, redo, and revert.
  * - Backing up a custom editor.
  */
-export class PawDrawEditorProvider implements vscode.CustomEditorProvider<PawDrawDocument> {
+export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocument> {
 
 	private static newPawDrawFileId = 1;
 
 	public static register(context: vscode.ExtensionContext): vscode.Disposable {
-		vscode.commands.registerCommand('catCustoms.pawDraw.new', () => {
-			const workspaceFolders = vscode.workspace.workspaceFolders;
-			if (!workspaceFolders) {
-				vscode.window.showErrorMessage("Creating new Paw Draw files currently requires opening a workspace");
-				return;
-			}
+		// vscode.commands.registerCommand('effectnode.viewer.new', () => {
+		// 	const workspaceFolders = vscode.workspace.workspaceFolders;
+		// 	if (!workspaceFolders) {
+		// 		vscode.window.showErrorMessage("Creating new Paw Draw files currently requires opening a workspace");
+		// 		return;
+		// 	}
 
-			const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, `new-${PawDrawEditorProvider.newPawDrawFileId++}.pawdraw`)
-				.with({ scheme: 'untitled' });
+		// 	const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, `new-${ENViewerProvider.newPawDrawFileId++}.pawdraw`)
+		// 		.with({ scheme: 'untitled' });
 
-			vscode.commands.executeCommand('vscode.openWith', uri, PawDrawEditorProvider.viewType);
-		});
+		// 	vscode.commands.executeCommand('vscode.openWith', uri, ENViewerProvider.viewType);
+		// });
 
 		return vscode.window.registerCustomEditorProvider(
-			PawDrawEditorProvider.viewType,
-			new PawDrawEditorProvider(context),
+			ENViewerProvider.viewType,
+			new ENViewerProvider(context),
 			{
 				// For this demo extension, we enable `retainContextWhenHidden` which keeps the
 				// webview alive even when it is not visible. You should avoid using this setting
@@ -223,7 +223,7 @@ export class PawDrawEditorProvider implements vscode.CustomEditorProvider<PawDra
 			});
 	}
 
-	private static readonly viewType = 'catCustoms.pawDraw';
+	private static readonly viewType = 'effectnode.viewer';
 
 	/**
 	 * Tracks all known webviews
@@ -339,9 +339,9 @@ export class PawDrawEditorProvider implements vscode.CustomEditorProvider<PawDra
 	 */
 	private getHtmlForWebview(webview: vscode.Webview, document: PawDrawDocument): string {
 		// Local path to script and css for the webview
-		const scriptUri = webview.asWebviewUri(vscode.Uri.file(
-			path.join(this._context.extensionPath, 'media', 'pawDraw.js')
-		));
+		// const scriptUri = webview.asWebviewUri(vscode.Uri.file(
+		// 	path.join(this._context.extensionPath, 'media', 'pawDraw.js')
+		// ));
 
 		const scriptAppUri = webview.asWebviewUri(vscode.Uri.file(
 			path.join(this._context.extensionPath, 'media', 'gui-out', 'app.js')
@@ -444,7 +444,7 @@ export class PawDrawEditorProvider implements vscode.CustomEditorProvider<PawDra
 
 				<title>Paw Draw</title>
 			</head>
-			<body >
+			<body>
 				<div id="root"></div>
 
 				<!--

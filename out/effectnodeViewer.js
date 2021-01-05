@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PawDrawEditorProvider = void 0;
+exports.ENViewerProvider = void 0;
 const path = require("path");
 const vscode = require("vscode");
 const dispose_1 = require("./dispose");
@@ -144,7 +144,7 @@ class PawDrawDocument extends dispose_1.Disposable {
  * - Implementing save, undo, redo, and revert.
  * - Backing up a custom editor.
  */
-class PawDrawEditorProvider {
+class ENViewerProvider {
     constructor(_context) {
         this._context = _context;
         /**
@@ -163,11 +163,11 @@ class PawDrawEditorProvider {
         // 		vscode.window.showErrorMessage("Creating new Paw Draw files currently requires opening a workspace");
         // 		return;
         // 	}
-        // 	const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, `new-${PawDrawEditorProvider.newPawDrawFileId++}.pawdraw`)
+        // 	const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, `new-${ENViewerProvider.newPawDrawFileId++}.pawdraw`)
         // 		.with({ scheme: 'untitled' });
-        // 	vscode.commands.executeCommand('vscode.openWith', uri, PawDrawEditorProvider.viewType);
+        // 	vscode.commands.executeCommand('vscode.openWith', uri, ENViewerProvider.viewType);
         // });
-        return vscode.window.registerCustomEditorProvider(PawDrawEditorProvider.viewType, new PawDrawEditorProvider(context), {
+        return vscode.window.registerCustomEditorProvider(ENViewerProvider.viewType, new ENViewerProvider(context), {
             // For this demo extension, we enable `retainContextWhenHidden` which keeps the
             // webview alive even when it is not visible. You should avoid using this setting
             // unless is absolutely required as it does have memory overhead.
@@ -392,9 +392,9 @@ class PawDrawEditorProvider {
         // }
     }
 }
-exports.PawDrawEditorProvider = PawDrawEditorProvider;
-PawDrawEditorProvider.newPawDrawFileId = 1;
-PawDrawEditorProvider.viewType = 'effectnode.viewer';
+exports.ENViewerProvider = ENViewerProvider;
+ENViewerProvider.newPawDrawFileId = 1;
+ENViewerProvider.viewType = 'effectnode.viewer';
 /**
  * Tracks all webviews.
  */
@@ -424,4 +424,4 @@ class WebviewCollection {
         });
     }
 }
-//# sourceMappingURL=pawDrawEditor.js.map
+//# sourceMappingURL=effectnodeViewer.js.map
