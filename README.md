@@ -1,3 +1,5 @@
+![Character Action Viewer](https://github.com/wonglok/effectnode-vs-extension/blob/master/documentation/intro.gif?raw=true)!
+
 # EffectNode Character Action Viewer
 1. Download No Skin Action FBX files from mixamo
 2. Make ./actions folder
