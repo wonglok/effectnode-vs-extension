@@ -269,6 +269,18 @@ class ENViewerProvider {
         const ACTOR = webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'summer.fbx'))).toString();
         const ACTORS = [
             {
+                name: 'matrix-fbx',
+                displayName: 'matrix-fbx',
+                type: 'fbx',
+                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'matrix.fbx'))).toString()
+            },
+            {
+                name: 'matrix-glb',
+                displayName: 'matrix-glb',
+                type: 'glb',
+                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'matrix.glb'))).toString()
+            },
+            {
                 name: 'swat-glb',
                 displayName: 'swat-glb',
                 type: 'glb',

@@ -2,7 +2,7 @@
 	"name": "effectnode-viewer",
 	"displayName": "EffectNode Action Viewer",
 	"description": "Character and Action Viewer",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"publisher": "effectnode",
 	"engines": {
 		"vscode": "^1.46.0"
@@ -41,7 +41,7 @@
 		"compile": "tsc -p ./",
 		"lint": "eslint . --ext .ts,.tsx",
 		"watch": "tsc -w -p ./",
-		"make": "vsce package"
+		"pack": "vsce package"
 	},
 	"devDependencies": {
 		"@types/node": "^12.12.0",
