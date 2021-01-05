@@ -154,8 +154,9 @@ function GLBItem ({ mouse, ...props }) {
 						const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 						// scene.background = envMap;
 						scene.environment = envMap;
+
 						mounter.traverse((item) => {
-							if (item && item.isMesh) {
+							if (item && item.isMesh && item.material.isMeshStandardMaterial) {
 								item.material.envMap = envMap;
 							}
 						});
@@ -190,8 +191,8 @@ function GLBItem ({ mouse, ...props }) {
 	}, [ACTOR]);
 
 	useEffect(() => {
-		camera.fov = 45;
-		camera.near = 0.01;
+		camera.fov = 55;
+		camera.near = 0.1;
 		camera.far = 8000;
 		camera.updateProjectionMatrix();
 		controls.current = new OrbitControls( camera, gl.domElement );
@@ -360,6 +361,7 @@ function ShadowMod ({ ...props }) {
 			shadow-camera-near={0.01}
 			shadow-camera-far={1500}
 		/>
+
     <group frustumCulled={false} rotation={[-0.5 * Math.PI, 0, 0]} position={[0, -5.0, 0]} {...props}>
       <mesh frustumCulled={false} receiveShadow renderOrder={2}>
         <circleBufferGeometry args={[500, 128]} />

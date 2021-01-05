@@ -377,25 +377,33 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 		const ACTORS = [
 			{
 				name: 'eric-glb',
-				displayName: 'Eric-glb',
+				displayName: 'eric',
 				type: 'glb',
 				url: webview.asWebviewUri(vscode.Uri.file(
 					path.join(this._context.extensionPath, 'media', 'chars', 'eric.glb')
 				)).toString()
 			},
+			{
+				name: 'paul-glb',
+				displayName: 'paul',
+				type: 'glb',
+				url: webview.asWebviewUri(vscode.Uri.file(
+					path.join(this._context.extensionPath, 'media', 'chars', 'paul.glb')
+				)).toString()
+			},
 
 			{
-				name: 'eric-fbx',
-				displayName: 'Eric-fbx',
-				type: 'fbx',
+				name: 'ryan-glb',
+				displayName: 'ryan',
+				type: 'glb',
 				url: webview.asWebviewUri(vscode.Uri.file(
-					path.join(this._context.extensionPath, 'media', 'chars', 'eric.fbx')
+					path.join(this._context.extensionPath, 'media', 'chars', 'ryan.glb')
 				)).toString()
 			},
 
 			{
 				name: 'swat-glb',
-				displayName: 'swat-glb',
+				displayName: 'swat',
 				type: 'glb',
 				url: webview.asWebviewUri(vscode.Uri.file(
 					path.join(this._context.extensionPath, 'media', 'chars', 'swat.glb')
@@ -418,9 +426,6 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 					path.join(this._context.extensionPath, 'media', 'chars', 'matrix.glb')
 				)).toString()
 			},
-
-
-
 
 			// {
 			// 	name: 'neo-glb',
@@ -475,6 +480,12 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 					return 0
 				}
 			});
+
+			//
+			newAdd = newAdd.filter((e: any) => {
+				return e.name !== '.DS_Store'
+			})
+			//
 			ACTORS.unshift(...newAdd)
 
 		}

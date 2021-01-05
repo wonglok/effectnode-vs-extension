@@ -2,7 +2,7 @@
 	"name": "effectnode-viewer",
 	"displayName": "EffectNode Action Viewer",
 	"description": "Character and Action Viewer",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"publisher": "effectnode",
 	"engines": {
 		"vscode": "^1.46.0"
