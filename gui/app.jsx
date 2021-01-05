@@ -163,14 +163,15 @@ function GLBItem ({ mouse, ...props }) {
 
 	useEffect(() => {
 		if (!controls.current) {
-			camera.near = 0.1;
+			camera.fov = 30;
+			camera.near = 0.01;
 			camera.far = 5000;
 			camera.updateProjectionMatrix();
 			controls.current = new OrbitControls( camera, gl.domElement );
 			controls.current.enableDamping = true;
 		}
-		// controls.current.minDistance = 2;
-		// controls.current.maxDistance = 10;
+		controls.current.minDistance = 1;
+		controls.current.maxDistance = 10000000;
 		// controls.current.target.set( 0, 0, - 0.2 );
 
 		// controls.current.using = false
@@ -181,11 +182,10 @@ function GLBItem ({ mouse, ...props }) {
 		// 	}, 1000)
 		// })
 
-
 		// camera.position.z = 20 * 1;
 		// camera.position.y = 10 * 1;
-
-		mounter.scale.set(0.1, 0.1, 0.1);
+		mounter.position.set(0, 0, 0);
+		mounter.scale.set(0.2, 0.2, 0.2);
 		mounter.traverse((item) => {
 			if (item.name === 'mixamorigSpine') {
 				item.getWorldPosition(controls.current.target);
@@ -194,7 +194,7 @@ function GLBItem ({ mouse, ...props }) {
 
 			if (item.name === 'mixamorigHead') {
 				item.getWorldPosition(camera.position);
-				camera.position.z += 30;
+				camera.position.z += 30 * 4;
 			}
 		});
 	});
@@ -313,7 +313,7 @@ window.addEventListener('ready-gl', ({ detail }) => {
 // }
 
 function ShadowMod({ ...props }) {
-	const d = 8.5 * 2;
+	const d = 8.5 * 2 * 4;
 
   return (
 		<>
