@@ -2,3 +2,5 @@
 node_modules
 exampleFiles
 *.vsix
+package-lock.json
+yarn.lock
