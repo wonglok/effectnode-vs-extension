@@ -1,3 +1,6 @@
+# Download Example Character and Actions Files
+[https://github.com/wonglok/effectnode-vs-extension/archive/master.zip](https://github.com/wonglok/effectnode-vs-extension/archive/master.zip)
+
 # Try Different Built-in Characters
 ![Different Characters](https://github.com/wonglok/effectnode-vs-extension/blob/master/documentation/different-chars.gif?raw=true)!
 
