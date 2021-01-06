@@ -219,6 +219,12 @@ class ENViewerProvider {
         };
         webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, document);
         webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e, webviewPanel.webview));
+        //
+        webviewPanel.webview.onDidReceiveMessage(e => {
+            if (e.type === 'setActorIDX') {
+                this._context.workspaceState.update('actorIDX', e.idx);
+            }
+        });
         // Wait for the webview to be properly ready before we init
         // webviewPanel.webview.onDidReceiveMessage(e => {
         // 	if (e.type === 'ready') {
@@ -275,34 +281,22 @@ class ENViewerProvider {
                 url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'eric.glb'))).toString()
             },
             {
-                name: 'paul-glb',
-                displayName: 'paul',
-                type: 'glb',
-                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'paul.glb'))).toString()
-            },
-            {
-                name: 'ryan-glb',
-                displayName: 'ryan',
-                type: 'glb',
-                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'ryan.glb'))).toString()
-            },
-            {
                 name: 'swat-glb',
                 displayName: 'swat',
                 type: 'glb',
                 url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'swat.glb'))).toString()
             },
             {
-                name: 'matrix-fbx',
-                displayName: 'matrix-fbx',
-                type: 'fbx',
-                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'matrix.fbx'))).toString()
-            },
-            {
                 name: 'matrix-glb',
-                displayName: 'matrix-glb',
+                displayName: 'matrix',
                 type: 'glb',
                 url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'matrix.glb'))).toString()
+            },
+            {
+                name: 'neo-glb',
+                displayName: 'neo',
+                type: 'glb',
+                url: webview.asWebviewUri(vscode.Uri.file(path.join(this._context.extensionPath, 'media', 'chars', 'neo.glb'))).toString()
             },
         ];
         if (vscode.workspace && vscode.workspace.workspaceFolders) {
@@ -353,6 +347,7 @@ class ENViewerProvider {
         // 		console.log('', file);
         // 	});
         // }
+        const actorIDX = this._context.workspaceState.get('actorIDX', 0);
         const isActionFolder = (SELECTED.indexOf('/action/') !== -1) || SELECTED.indexOf('/actions/') !== -1 || SELECTED.indexOf('/moves/') !== -1;
         const MODE = isActionFolder ? 'ACTION_PREVIEW' : 'MODEL_PREVIEW';
         return /* html */ `
@@ -395,6 +390,7 @@ class ENViewerProvider {
 
 				<script nonce="${nonce}">
 					window.VIEWER = {
+						ACTOR_IDX: ${actorIDX},
 						MODE: "${MODE}",
 						ACTORS: ${JSON.stringify(ACTORS)},
 						ACTOR: "${ACTOR}",

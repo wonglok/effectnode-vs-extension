@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useLoader, useThree } from 'react-three-fiber';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { AnimationMixer, MathUtils, PointLight, Vector3 } from 'three';
+import { AnimationMixer, MathUtils, PointLight, sRGBEncoding, Vector3, WebGLRenderTarget } from 'three';
 import * as THREE from 'three';
 import { getMouseDegrees } from './utils';
 import { getFirstTouchPos, getMousePos } from "./utils";
@@ -11,7 +11,52 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import create from 'zustand';
 
-// CustomEvent
+// import { extend } from 'react-three-fiber'
+// import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+// import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
+// import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
+// extend({ EffectComposer, RenderPass, UnrealBloomPass })
+
+// const useOutlines = create((set, get) => {
+// 	return {
+// 		outlines: [],
+// 		add: (v) => {
+// 			set({
+// 				outline: [...get().outline, v]
+// 			});
+// 		}
+// 	};
+// });
+
+// function Effects () {
+//   const { gl, scene, camera, size } = useThree();
+// 	// composer
+// 	const composer = useRef();
+// 	const renderTarget = useMemo(() => {
+// 		return new WebGLRenderTarget(size.width, size.height, { encoding: sRGBEncoding });
+// 	}, [size]);
+// 	useEffect(() => {
+// 		composer.current.setSize(size.width, size.height);
+// 	}, [size]);
+
+// 	useFrame(() => {
+// 		if (composer.current) {
+// 			composer.current.render();
+// 		}
+// 	}, 1);
+
+//   return (
+//     <effectComposer ref={composer} args={[gl]} renderTarget={renderTarget}>
+//       <renderPass attachArray="passes" args={[scene, camera]} />
+// 			<unrealBloomPass attachArray="passes" resolution={[size.width, size.height]} strength={0.1} threshold={0.1} radius={1}></unrealBloomPass>
+// 			{/* <outlinePass args={[size, scene, camera, outlines]} attachArray="passes"></outlinePass> */}
+// 			{/* resolution: Vector2, scene: Scene, camera: Camera, selectedObjects?: Object3D[] */}
+// 			{/* : Vector2, scene: Scene, camera: Camera, selectedObjects?: Object3D[]  */}
+// 			{/* <glitchPass attachArray="passes" renderToScreen /> */}
+// 		</effectComposer>
+// 	);
+// }
+
 /* global document acquireVsCodeApi window Uint8Array console Blob CustomEvent URL setTimeout setInterval clearInterval */
 const vscode = window.acquireVsCodeApi();
 let AppGlobals = {
@@ -19,11 +64,15 @@ let AppGlobals = {
 	lookAtMouse: false
 };
 
+
 const useActors = create((set, get) => {
+	let idx = window.VIEWER.ACTOR_IDX;
 	return {
-		ACTOR: window.VIEWER.ACTORS[0],
+		ACTOR: window.VIEWER.ACTORS[idx] || window.VIEWER.ACTORS[0],
 		ACTORS: window.VIEWER.ACTORS,
 		chooseActor: (v) => {
+			let idx = window.VIEWER.ACTORS.findIndex(a => a.url === v.url);
+			vscode.postMessage({ type: 'setActorIDX', idx });
 			set({ ACTOR: v });
 		}
 	};
@@ -229,9 +278,8 @@ function GLBItem ({ mouse, ...props }) {
 			});
 		}
 		return () => {
-			//
 		};
-	}, [controls.current]);
+	}, [ACTOR]);
 
 	const { worldPos, last, diff } = useMemo(() => {
 		const worldPos = new Vector3(0, 0, 0);
@@ -245,7 +293,7 @@ function GLBItem ({ mouse, ...props }) {
 			return;
 		}
 		mounter.traverse((item) => {
-			if (item.isBone && item.name === 'mixamorigHips') {
+			if (item.isBone && item.name === 'mixamorigNeck') {
 				item.getWorldPosition(worldPos);
 				if (last.length() === 0.0) {
 					last.copy(worldPos);
@@ -385,14 +433,23 @@ window.addEventListener('keydown', (event) => {
 });
 
 function Actors () {
+	const chosen = useActors(s => s.ACTOR);
 	const actors = useActors(s => s.ACTORS);
 	const chooseActor = useActors(s => s.chooseActor);
 	// const lookAtMouse = useActors(s => s.lookAtMouse);
 	// const setLookAtMouse = useActors(s => s.setLookAtMouse);
-	let btns = actors.map((a, i) => <div key={a.name + i} onClick={() => { chooseActor(a); }} style={{ color: (a.isNew ? '#ffffff' : '#222222'), backgroundColor: (a.isNew ? '#238823' : '#ececec'), display: 'inline-block', padding: '10px 20px' }}>{a.displayName}</div>);
+	let btnsNew = actors.filter(e => e.isNew).map((a, i) => <div key={a.name + i} onClick={() => { chooseActor(a); }} style={{ textDecoration: chosen.name === a.name ? 'underline' : 'none', color: (a.isNew ? '#ffffff' : '#222222'), backgroundColor: (a.isNew ? '#bababa' : '#ececec'), display: 'inline-block', padding: '6px 12px' }}>{a.displayName}</div>);
+	let btnsOld = actors.filter(e => !e.isNew).map((a, i) => <div key={a.name + i} onClick={() => { chooseActor(a); }} style={{ textDecoration: chosen.name === a.name ? 'underline' : 'none', color: (a.isNew ? '#ffffff' : '#222222'), backgroundColor: (a.isNew ? '#bababa' : '#ececec'), display: 'inline-block', padding: '6px 12px' }}>{a.displayName}</div>);
 	return <div>
-		<div onClick={() => { AppGlobals.lookAtMouse = !AppGlobals.lookAtMouse; }} style={{ color: '#222222', backgroundColor: '#ececec', display: 'inline-block', padding: '10px 20px' }}>Look At Mouse</div>
-		{window.VIEWER.MODE === 'ACTION_PREVIEW' && btns}
+		<div>
+			{window.VIEWER.MODE === 'ACTION_PREVIEW' && btnsNew}
+		</div>
+		<div>
+		{window.VIEWER.MODE === 'ACTION_PREVIEW' && btnsOld}
+		</div>
+		<div>
+			<div onClick={() => { AppGlobals.lookAtMouse = !AppGlobals.lookAtMouse; }} style={{ color: '#222222', backgroundColor: '#ececec', display: 'inline-block', padding: '10px 20px' }}>Look At Mouse</div>
+		</div>
 	</div>;
 }
 
@@ -405,7 +462,7 @@ function App () {
 		}
 	});
 	return <div style={{ height: `calc(100%)` }}>
-		<div style={{ display: 'block', position: 'absolute', top: '0px', left: '0px', zIndex: 10, height: '120px', overflow: 'auto' }} >
+		<div style={{ display: 'block', position: 'absolute', top: '0px', left: '0px', zIndex: 10 }} >
 			<Actors></Actors>
 		</div>
 		<div style={{ height: `calc(100%)` }}>
@@ -424,6 +481,7 @@ function App () {
 				window.dispatchEvent(new CustomEvent('ready-gl', { detail: { gl } })); }} className="full" style={{ width: '100%', height: '100%'
 			}}>
 				<MyScene mouse={mouse}></MyScene>
+				{/* <Effects></Effects> */}
 			</Canvas>
 		</div>
 	</div>;
@@ -433,3 +491,5 @@ ReactDOM.render(
   <App></App>,
   document.getElementById('root')
 );
+
+

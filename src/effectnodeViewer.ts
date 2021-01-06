@@ -295,6 +295,16 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 
 		webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e, webviewPanel.webview));
 
+
+		//
+		webviewPanel.webview.onDidReceiveMessage(e => {
+			if (e.type === 'setActorIDX') {
+				this._context.workspaceState.update('actorIDX', e.idx)
+			}
+		});
+
+
+
 		// Wait for the webview to be properly ready before we init
 		// webviewPanel.webview.onDidReceiveMessage(e => {
 		// 	if (e.type === 'ready') {
@@ -383,23 +393,6 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 					path.join(this._context.extensionPath, 'media', 'chars', 'eric.glb')
 				)).toString()
 			},
-			{
-				name: 'paul-glb',
-				displayName: 'paul',
-				type: 'glb',
-				url: webview.asWebviewUri(vscode.Uri.file(
-					path.join(this._context.extensionPath, 'media', 'chars', 'paul.glb')
-				)).toString()
-			},
-
-			{
-				name: 'ryan-glb',
-				displayName: 'ryan',
-				type: 'glb',
-				url: webview.asWebviewUri(vscode.Uri.file(
-					path.join(this._context.extensionPath, 'media', 'chars', 'ryan.glb')
-				)).toString()
-			},
 
 			{
 				name: 'swat-glb',
@@ -411,30 +404,22 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 			},
 
 			{
-				name: 'matrix-fbx',
-				displayName: 'matrix-fbx',
-				type: 'fbx',
-				url: webview.asWebviewUri(vscode.Uri.file(
-					path.join(this._context.extensionPath, 'media', 'chars', 'matrix.fbx')
-				)).toString()
-			},
-			{
 				name: 'matrix-glb',
-				displayName: 'matrix-glb',
+				displayName: 'matrix',
 				type: 'glb',
 				url: webview.asWebviewUri(vscode.Uri.file(
 					path.join(this._context.extensionPath, 'media', 'chars', 'matrix.glb')
 				)).toString()
 			},
 
-			// {
-			// 	name: 'neo-glb',
-			// 	displayName: 'neo-glb',
-			// 	type: 'glb',
-			// 	url: webview.asWebviewUri(vscode.Uri.file(
-			// 		path.join(this._context.extensionPath, 'media', 'chars', 'neo.glb')
-			// 	)).toString()
-			// },
+			{
+				name: 'neo-glb',
+				displayName: 'neo',
+				type: 'glb',
+				url: webview.asWebviewUri(vscode.Uri.file(
+					path.join(this._context.extensionPath, 'media', 'chars', 'neo.glb')
+				)).toString()
+			},
 			// {
 			// 	name: 'neo-fbx',
 			// 	displayName: 'neo-fbx',
@@ -500,6 +485,7 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 		// 	});
 		// }
 
+		const actorIDX = this._context.workspaceState.get('actorIDX', 0)
 
 		const isActionFolder = (SELECTED.indexOf('/action/') !== -1) || SELECTED.indexOf('/actions/') !== -1 || SELECTED.indexOf('/moves/') !== -1
 		const MODE = isActionFolder ? 'ACTION_PREVIEW' : 'MODEL_PREVIEW'
@@ -544,6 +530,7 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 
 				<script nonce="${nonce}">
 					window.VIEWER = {
+						ACTOR_IDX: ${actorIDX},
 						MODE: "${MODE}",
 						ACTORS: ${JSON.stringify(ACTORS)},
 						ACTOR: "${ACTOR}",
