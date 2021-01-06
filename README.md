@@ -10,7 +10,7 @@
 3. Click the file to view it.
 
 # Use Your own Characters
-![Use Your own Characters](https://github.com/wonglok/effectnode-vs-extension/blob/master/documentation/documentation/use-my-own-characters.gif?raw=true)!
+![Use Your own Characters](https://github.com/wonglok/effectnode-vs-extension/blob/master/documentation/use-my-own-characters.gif?raw=true)!
 
 ## Use Your own Characters
 1. Rigyour Model with Mixamo
