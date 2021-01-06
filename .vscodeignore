@@ -4,3 +4,4 @@ exampleFiles
 *.vsix
 package-lock.json
 yarn.lock
+documentation

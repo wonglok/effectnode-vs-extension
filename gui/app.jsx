@@ -126,6 +126,8 @@ function GLBItem ({ mouse, ...props }) {
 	const controls = useRef();
 	const actions = useRef();
 
+	const [camSync, setCamSync] = useState(0);
+
 	const { camera, scene, gl } = useThree();
 	let gltf = false;
 	let fbx = false;
@@ -183,7 +185,7 @@ function GLBItem ({ mouse, ...props }) {
 				}
 			});
 		}
-	});
+	}, [ACTOR]);
 
 	// // useEffect(() => {
 	// // 	mounter.traverse((item) => {
@@ -218,18 +220,24 @@ function GLBItem ({ mouse, ...props }) {
   useEffect(() => {
     actions.current = { defaultAction: mixer.clipAction(animations[0], group.current) };
 		actions.current.defaultAction.play();
-
+		window.requestAnimationFrame(() => {
+			setCamSync(Math.random());
+		});
     return () => {
 			mixer.uncacheRoot(group.current);
 		};
-  });
+  }, [ACTOR]);
 
 	useMemo(() => {
 		let light = new PointLight('#ff00ff', 0.3);
 		light.position.x = 200;
 		light.position.z = 200;
 		light.position.y = 0;
-		mounter.getObjectByName('mixamorigHips').add(light);
+		let part = 'mixamorigSpine';
+		let obj = mounter.getObjectByName(part);
+		if (obj) {
+			obj.add(light);
+		}
 	}, [ACTOR]);
 
 	useMemo(() => {
@@ -237,7 +245,11 @@ function GLBItem ({ mouse, ...props }) {
 		light.position.x = -200;
 		light.position.z = -200;
 		light.position.y = 0;
-		mounter.getObjectByName('mixamorigHips').add(light);
+		let part = 'mixamorigSpine';
+		let obj = mounter.getObjectByName(part);
+		if (obj) {
+			obj.add(light);
+		}
 	}, [ACTOR]);
 
 	useEffect(() => {
@@ -249,10 +261,18 @@ function GLBItem ({ mouse, ...props }) {
 		controls.current.enableDamping = true;
 		controls.current.minDistance = 1;
 		controls.current.maxDistance = 10000000;
+
+		// controls.current.addEventListener('change', (e) => {
+		// 	console.log(camera.position.toArray().join(', '));
+		// });
 		return () => {
 			controls.current.dispose();
 		};
-	});
+	}, [ACTOR, camSync]);
+
+	useEffect(() => {
+		camera.position.fromArray([-0.004581918350202635, 25.094036624878548, 81.08213183421572]);
+	}, [ACTOR, camSync]);
 
 	useEffect(() => {
 		if (mounter) {
@@ -277,16 +297,18 @@ function GLBItem ({ mouse, ...props }) {
 				}
 			});
 		}
+
 		return () => {
+			console.log('clean');
 		};
-	}, [ACTOR]);
+	}, [ACTOR, camSync]);
 
 	const { worldPos, last, diff } = useMemo(() => {
 		const worldPos = new Vector3(0, 0, 0);
 		const last = new Vector3(0, 0, 0);
 		const diff = new Vector3(0, 0, 0);
 		return { worldPos, last, diff };
-	}, [ACTOR]);
+	}, [ACTOR, camSync]);
 
 	useFrame(() => {
 		if (!worldPos) {
@@ -303,6 +325,9 @@ function GLBItem ({ mouse, ...props }) {
 				}
 				if (diff.length() > 0) {
 					camera.position.add(diff);
+					if (controls.current) {
+						controls.current.target.add(diff);
+					}
 				}
 			}
 		});
@@ -426,11 +451,11 @@ function ShadowMod ({ ...props }) {
   );
 }
 
-window.addEventListener('keydown', (event) => {
-	if (event.metaKey && (event.key === 'r')) {
-		vscode.postMessage({ type: 'reload' });
-	}
-});
+// window.addEventListener('keydown', (event) => {
+// 	if (event.metaKey && (event.key === 'r')) {
+// 		vscode.postMessage({ type: 'reload' });
+// 	}
+// });
 
 function Actors () {
 	const chosen = useActors(s => s.ACTOR);
