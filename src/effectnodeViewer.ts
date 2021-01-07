@@ -488,7 +488,7 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 		const actorIDX = this._context.workspaceState.get('actorIDX', 0)
 
 		const isActionFolder = (SELECTED.indexOf('/action/') !== -1) || SELECTED.indexOf('/actions/') !== -1 || SELECTED.indexOf('/moves/') !== -1
-		const MODE = isActionFolder ? 'ACTION_PREVIEW' : 'MODEL_PREVIEW'
+		let MODE = isActionFolder ? 'ACTION_PREVIEW' : 'MODEL_PREVIEW'
 
 		return /* html */`
 			<!DOCTYPE html >
@@ -533,7 +533,7 @@ export class ENViewerProvider implements vscode.CustomEditorProvider<PawDrawDocu
 						ACTOR_IDX: ${actorIDX},
 						MODE: "${MODE}",
 						ACTORS: ${JSON.stringify(ACTORS)},
-						ACTOR: "${ACTOR}",
+						//ACTOR: "${ACTOR}",
 						HDR: "${HDR}",
 						SELECTED: "${SELECTED}"
 					};

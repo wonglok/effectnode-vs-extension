@@ -137,6 +137,8 @@ function GLBItem ({ mouse, ...props }) {
 
 	let action = false;
 
+	// console.log(JSON.stringify(window.VIEWER, null, '\t'));
+
 	if (window.VIEWER.MODE === 'ACTION_PREVIEW') {
 		if (ACTOR.indexOf('.fbx') !== -1) {
 			fbx = useLoader(FBXLoader, ACTOR);
@@ -218,6 +220,10 @@ function GLBItem ({ mouse, ...props }) {
 
 	useFrame((state, delta) => mixer.update(delta));
   useEffect(() => {
+		if (!(animations && animations[0])) {
+			return () => {};
+		}
+
     actions.current = { defaultAction: mixer.clipAction(animations[0], group.current) };
 		actions.current.defaultAction.play();
 		window.requestAnimationFrame(() => {
@@ -268,11 +274,7 @@ function GLBItem ({ mouse, ...props }) {
 		return () => {
 			controls.current.dispose();
 		};
-	}, [ACTOR, camSync]);
-
-	useEffect(() => {
-		camera.position.fromArray([-0.004581918350202635, 25.094036624878548, 81.08213183421572]);
-	}, [ACTOR, camSync]);
+	}, [camSync]);
 
 	useEffect(() => {
 		if (mounter) {
@@ -308,7 +310,7 @@ function GLBItem ({ mouse, ...props }) {
 		const last = new Vector3(0, 0, 0);
 		const diff = new Vector3(0, 0, 0);
 		return { worldPos, last, diff };
-	}, [ACTOR, camSync]);
+	}, [camSync]);
 
 	useFrame(() => {
 		if (!worldPos) {
